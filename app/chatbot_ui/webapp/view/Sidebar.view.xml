@@ -1,0 +1,31 @@
+<mvc:View
+  controllerName="chatbotui.controller.Sidebar"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m">
+
+  <Page id="_IDGenPage" showFooter="true">
+    <customHeader>
+      <Bar id="_IDGenBar1">
+        <contentMiddle>
+          <HBox id="_IDGenHBox2" width="100%" justifyContent="Center">
+            <Button id="_IDGenButton" icon="sap-icon://add" text="New Chat" press="onNewChat"/>
+          </HBox>
+        </contentMiddle>
+      </Bar>
+    </customHeader>
+
+    <content>
+      <List id="_IDGenList" mode="SingleSelectMaster" width="100%" growing="true" />
+    </content>
+
+    <footer>
+        <Toolbar id="_IDGenToolbar" design="Transparent" width="100%">
+            <HBox id="_IDGenHBox3" width="100%" justifyContent="Center" alignItems="Center">
+                <Label id="_IDGenLabel" text="Dark Mode" labelFor="themeSwitch" class="sapUiSmallMarginEnd"  />
+                <Switch id="themeSwitch" change="onThemeToggle" customTextOff=" " customTextOn=" "/>
+            </HBox>
+        </Toolbar>
+    </footer>
+
+  </Page>
+</mvc:View>

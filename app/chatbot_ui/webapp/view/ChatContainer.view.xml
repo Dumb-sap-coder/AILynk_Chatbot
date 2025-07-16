@@ -1,0 +1,51 @@
+<mvc:View
+  controllerName="chatbotui.controller.ChatContainer"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:layout="sap.ui.layout">
+	<Page id="_IDchatPage" enableScrolling="false">
+		<customHeader>
+			<Bar id="chatHeader">
+				<contentLeft>
+					<HBox id="_IDGenHBox1" width="100%" justifyContent="Start" alignItems="Center" class="headerHBox">
+						<Image id="_IDGenImage" src="img/logo.png" height="32px" width="32px" />	
+						<Title id="_IDGenTitle" text="AI Lynk" level="H2" />
+					</HBox>
+				</contentLeft>
+			</Bar>
+		</customHeader>
+
+		<!-- VBox flex container -->
+		<VBox id="mainVBox" class="chatMainVBox" fitContainer="true">
+			<ScrollContainer id="_IDGenScrollContainer1"
+		      height="90%"
+		      width="100%"
+		      vertical="true"
+		      horizontal="false">
+				<VBox id="chatMessagesBox" class= "sapUiSmallMargin" />
+			</ScrollContainer>
+		</VBox>
+
+		<!-- Footer with toolbar -->
+		<footer >
+			<OverflowToolbar id="chatFooterToolbar" class="chatFooterBar">
+				<HBox id="_IDGenHBox4" class="footerHBox" alignItems="Center" justifyContent="SpaceBetween" width="100%">
+					<Button id="uploadButton" icon="sap-icon://attachment" tooltip="Upload File" press="onFileUpload" />
+					<VBox id="inputWrapper" width="100%">
+						<TextArea
+            id="messageInput"
+            growing="true"
+            growingMaxLines="3"
+            placeholder="Type your message..."
+            class="footerInput"
+            width="100%" />
+					</VBox>
+					<HBox id="_IDGenHBox5" alignItems="Center" renderType="Div">
+						<Button id="micButton" icon="sap-icon://microphone" tooltip="Voice Input" press="onVoiceInput" />
+						<Button id="sendButton" icon="sap-icon://paper-plane" type="Emphasized" tooltip="Send Message" press="onSend" />
+					</HBox>
+				</HBox>
+			</OverflowToolbar>
+		</footer>
+	</Page>
+</mvc:View>

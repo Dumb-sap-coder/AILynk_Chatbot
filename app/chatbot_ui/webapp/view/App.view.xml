@@ -1,0 +1,16 @@
+<mvc:View controllerName="chatbotui.controller.App"
+    displayBlock="true"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m">
+    <Shell id="_IDGenShell" >
+     <SplitApp id="app" >
+  <masterPages>
+    <mvc:XMLView id="_IDGenXMLView1" viewName="chatbotui.view.Sidebar" />
+  </masterPages>
+
+  <detailPages>
+    <mvc:XMLView id="_IDGenXMLView2" viewName="chatbotui.view.ChatContainer" />
+  </detailPages>
+  </SplitApp>
+  </Shell>
+</mvc:View>

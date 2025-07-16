@@ -1,0 +1,73 @@
+/* Ensure no short word breaks */
+.userMessage, .botMessage {
+  padding: 10px 14px;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.userMessage {
+  background-color: #0064d9;
+  color: white;
+  margin-left: 8px;
+  max-width: 50vw;
+}
+
+.botMessage {
+  background-color: var(--sapGroup_ContentBackground);
+  color: var(--sapTextColor);
+  margin-right: 8px;
+  max-width: 50vw;
+}
+
+.timestampText {
+  font-size: 10px;
+  color: var(--sapContent_LabelColor);
+  margin-top: 4px;
+  white-space: nowrap;
+}
+
+
+  /* VBox layout stretching */
+html, body, .sapUiBody, .sapMApp, .sapMPage {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+  
+  /* Footer styling, NO fixed position */
+.chatFooterBar {
+    background-color: white;
+    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
+    padding: 0 12px;
+    width: 100%;
+    min-height: 85px; 
+    display: flex;
+    align-items: center;
+}
+  
+.footerHBox {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 10px;
+}
+  
+  /* Buttons in footer */
+.chatFooterBar .sapMBtn {
+    min-width: 40px;
+}
+
+#uploadedFileChip {
+    padding-left: 8px;
+    font-size: 13px;
+    gap: 6px;
+}
+  
+.footerInput {
+    /* max-width: 800px; */
+    width: auto;
+  }
+  
+ 
+  

@@ -1,0 +1,139 @@
+{
+  "_version": "1.65.0",
+  "sap.app": {
+    "id": "chatbotui",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:basic",
+      "version": "1.18.2",
+      "toolsId": "c1aa6d1c-4f7a-4be5-bc1a-765ce54d27ce"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/service/AILynk_ChatbotService/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "chat-AILynk": {
+          "semanticObject": "chat",
+          "action": "AILynk",
+          "title": "{{chat-AILynk.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.138.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "chatbotui.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "async": true,
+        "viewPath": "chatbotui.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "transition": "slide"
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "sidebar",
+          "target": "SidebarView"
+        },
+        {
+          "pattern": "chat",
+          "name": "chatcontainer",
+          "target": "ChatContainerView"
+        }
+      ],
+      "targets": {
+        "SidebarView": {
+          "viewName": "Sidebar",
+          "viewId": "Sidebar",
+          "controlId": "app",
+          "controlAggregation":  "masterPages" 
+        },
+        "ChatContainerView": {
+          "viewName": "ChatContainer",
+          "viewId": "ChatContainer",
+          "controlId": "app",
+          "controlAggregation":  "detailPages" 
+        }
+      }
+    },
+    "rootView": {
+      "viewName": "chatbotui.view.App",
+      "type": "XML",
+      "id": "App",
+      "async": true
+    }
+  }
+}
