@@ -17,6 +17,5 @@ entity Message : managed {
   key msg_id    : UUID;   
   response      : String;
   role          : Role;                      
-  createdAt     : Timestamp @cds.on.insert : $now;
   chat_ID       : Association to Chat;   
 }

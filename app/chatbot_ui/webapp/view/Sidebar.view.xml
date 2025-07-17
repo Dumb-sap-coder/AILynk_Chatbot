@@ -15,7 +15,7 @@
     </customHeader>
 
     <content>
-      <List id="_IDGenList" mode="SingleSelectMaster" width="100%" growing="true" />
+      <List id="_IDGenList" mode="SingleSelectMaster" itemPress="onSessionSelect" width="100%" growing="true" />
     </content>
 
     <footer>

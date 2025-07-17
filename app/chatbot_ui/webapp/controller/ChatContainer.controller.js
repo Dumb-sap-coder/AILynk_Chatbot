@@ -13,6 +13,8 @@ sap.ui.define([
             this._recognition = null;
             this._setupSpeechRecognition();
             this._uploadedFile = null;
+            this._sessionId = null;
+            this._chatSessions = this._loadSessions();
         },
 
         onSend: function () {
@@ -50,40 +52,37 @@ sap.ui.define([
             const oDate = new Date();
             const timestamp = oDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const isUser = role === "user";
-        
-            // Message bubble
-            const oMessageText = new sap.m.Text({
-                text: text,
-                wrapping: true
-            }).addStyleClass(isUser ? "userMessage" : "botMessage");
-        
-            // Timestamp Text
-            const oTimestampText = new sap.m.Text({
-                text: timestamp,
-                wrapping: false
-            }).addStyleClass("timestampText");
-        
-            // Align timestamp differently for user and bot
-            const oTimestampHBox = new sap.m.HBox({
-                justifyContent: isUser ? "End" : "Start",
-                items: [oTimestampText]
-            });
-        
-            // Combine message and timestamp in a VBox
-            const oMessageVBox = new sap.m.VBox({
-                items: [oMessageText, oTimestampHBox]
-            });
-        
-            // Align message to left/right based on role
-            const oMessageHBox = new sap.m.HBox({
-                justifyContent: isUser ? "End" : "Start",
-                items: [oMessageVBox]
-            });
-        
+
+            const oMessageText = new sap.m.Text({ text, wrapping: true })
+                .addStyleClass(isUser ? "userMessage" : "botMessage");
+
+            const oTimestampText = new sap.m.Text({ text: timestamp })
+                .addStyleClass("timestampText");
+
+            const oTimestampHBox = new sap.m.HBox({ justifyContent: isUser ? "End" : "Start", items: [oTimestampText] });
+            const oMessageVBox = new sap.m.VBox({ items: [oMessageText, oTimestampHBox] });
+            const oMessageHBox = new sap.m.HBox({ justifyContent: isUser ? "End" : "Start", items: [oMessageVBox] });
+
+
             this.byId("chatMessagesBox").addItem(oMessageHBox);
             this._scrollToBottom();
-        },        
-        
+
+            if (!this._sessionId) {
+                this._sessionId = this._generateSessionId();
+                this._chatSessions[this._sessionId] = { title: "New Chat", messages: [] };
+            }
+
+            // Set title to first user message
+            if (this._chatSessions[this._sessionId].title === "New Chat" && role === "user") {
+                this._chatSessions[this._sessionId].title = text.length > 25 ? text.slice(0, 25) + "..." : text;
+                this._saveSessions();
+                sap.ui.getCore().getEventBus().publish("chat", "sessionUpdated");
+            }
+
+            this._chatSessions[this._sessionId].messages.push({ text, role, timestamp });
+            this._saveSessions();
+        },
+
 
         _scrollToBottom: function () {
             const oScroll = this.byId("_IDGenScrollContainer1");
@@ -94,7 +93,7 @@ sap.ui.define([
                 }
             }, 100);
         },
-        
+
         onVoiceInput: function () {
             if (!this._recognition) {
                 MessageToast.show("Speech recognition not supported.");
@@ -178,23 +177,42 @@ sap.ui.define([
         },
 
         resetChat: function () {
-            const oChatBox = this.byId("chatMessagesBox");
-            oChatBox.removeAllItems();
-
-            const oInput = this.byId("messageInput");
-            oInput.setValue("");
-            oInput.setVisible(true);
-
+            this.byId("chatMessagesBox").removeAllItems();
+            this.byId("messageInput").setValue("").setVisible(true);
             this._uploadedFile = null;
 
             const chip = this.byId("uploadedFileChip");
             if (chip) chip.destroy();
 
-            const micButton = this.byId("micButton");
-            if (micButton) micButton.setEnabled(true);
+            this.byId("micButton").setEnabled(true);
+
+            // New session
+            this._sessionId = null;
         },
 
-        
+        _generateSessionId: function () {
+            return "session_" + Date.now();
+        },
+
+        _loadSessions: function () {
+            const stored = sessionStorage.getItem("chatSessions");
+            return stored ? JSON.parse(stored) : {};
+        },
+
+        _saveSessions: function () {
+            sessionStorage.setItem("chatSessions", JSON.stringify(this._chatSessions));
+        },
+
+        loadSession: function (sessionId) {
+            const session = this._chatSessions[sessionId];
+            if (!session) return;
+
+            this.resetChat();
+            this._sessionId = sessionId;
+
+            session.messages.forEach(msg => this._addMessage(msg.text, msg.role));
+        }
+
 
     });
 });

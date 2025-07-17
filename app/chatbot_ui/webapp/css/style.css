@@ -5,9 +5,9 @@
   word-break: break-word;
 }
 
-.userMessage {
-  background-color: #0064d9;
-  color: white;
+.userMessage { 
+  background-color: var(--sapButton_Emphasized_Background); 
+  color: var(--sapButton_Emphasized_TextColor); 
   margin-left: 8px;
   max-width: 50vw;
 }
