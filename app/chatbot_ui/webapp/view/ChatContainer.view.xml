@@ -8,8 +8,8 @@
 			<Bar id="chatHeader">
 				<contentLeft>
 					<HBox id="_IDGenHBox1" width="100%" justifyContent="Start" alignItems="Center" class="headerHBox">
-						<Image id="_IDGenImage" src="img/logo.png" height="32px" width="32px" />	
-						<Title id="_IDGenTitle" text="AI Lynk" level="H2" />
+						<Image id="_IDGenImage"  height="32px" width="32px" />	
+						<Title id="_IDGenTitle" text="ArchAI" level="H2" />
 					</HBox>
 				</contentLeft>
 			</Bar>

@@ -69,5 +69,16 @@ html, body, .sapUiBody, .sapMApp, .sapMPage {
     width: auto;
   }
   
+  .recordingGlow {
+    animation: glowPulse 1s infinite;
+    color: red;
+}
+
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 0px red; }
+    50% { box-shadow: 0 0 10px red; }
+    100% { box-shadow: 0 0 0px red; }
+}
+
  
   

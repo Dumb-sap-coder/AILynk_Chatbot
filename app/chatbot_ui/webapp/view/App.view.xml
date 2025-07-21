@@ -2,8 +2,8 @@
     displayBlock="true"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
-    <Shell id="_IDGenShell" >
-     <SplitApp id="app" >
+    <Shell id="_IDGenShell">
+     <SplitApp id="app" class="sapUiResponsiveContentPadding">
   <masterPages>
     <mvc:XMLView id="_IDGenXMLView1" viewName="chatbotui.view.Sidebar" />
   </masterPages>

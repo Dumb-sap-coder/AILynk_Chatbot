@@ -19,6 +19,13 @@
       "target": "$1",
       "service": "html5-apps-repo-rt",
       "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^/webhook/(.*)$",
+      "target": "/$1",
+      "destination": "ArchAI_UserDbQuery",
+      "authenticationType": "none"
     }
+
   ]
 }

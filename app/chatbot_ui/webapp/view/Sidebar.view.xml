@@ -18,14 +18,14 @@
       <List id="_IDGenList" mode="SingleSelectMaster" itemPress="onSessionSelect" width="100%" growing="true" />
     </content>
 
-    <footer>
+    <!-- <footer>
         <Toolbar id="_IDGenToolbar" design="Transparent" width="100%">
             <HBox id="_IDGenHBox3" width="100%" justifyContent="Center" alignItems="Center">
                 <Label id="_IDGenLabel" text="Dark Mode" labelFor="themeSwitch" class="sapUiSmallMarginEnd"  />
                 <Switch id="themeSwitch" change="onThemeToggle" customTextOff=" " customTextOn=" "/>
             </HBox>
         </Toolbar>
-    </footer>
+    </footer> -->
 
   </Page>
 </mvc:View>
