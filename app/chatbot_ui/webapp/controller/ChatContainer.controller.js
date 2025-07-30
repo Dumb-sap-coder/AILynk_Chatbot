@@ -7,6 +7,20 @@ sap.ui.define([
 ], function (Controller, MessageToast, Text, HBox, VBox) {
     "use strict";
 
+    const URLS = {
+        normalQuery: "https://n8n.archlynk.com/webhook/chatbot-query",
+        fileUpload: "https://a2a86f3c6c41.ngrok-free.app/api/v1/archAI/file-upload",
+        userDocQuery: "https://n8n.archlynk.com/webhook/chatbot-user-doc-query"
+    };
+
+    const AUTH = {
+        username: "ArchAI_User",
+        password: "archAI_user",
+        getBasicAuthHeader() {
+            return "Basic " + btoa(this.username + ":" + this.password);
+        }
+    };
+
     return Controller.extend("chatbotui.controller.ChatContainer", {
         onInit() {
             this._recognition = null;
@@ -14,6 +28,7 @@ sap.ui.define([
             this._uploadedFile = null;
             this._chatSessions = this._loadSessions();
             this._transcriptBuffer = "";
+            this._hasUploadedFile = false;
 
             const oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.getRoute("chatcontainer").attachPatternMatched(this._onRouteMatched, this);
@@ -52,60 +67,139 @@ sap.ui.define([
 
             const sessionId = this._sessionId || this._generateSessionId();
             this._sessionId = sessionId;
-            this._addMessage("Bot is thinking...", "bot");
+            //const botThinkingMessage = this._showBotThinking();
+            const thinking = this._showBotThinking();
 
-            // Call webhook 
-            const username = "ArchAI_User";
-            const password = "archAI_user";
-            const basicAuth = "Basic " + btoa(username + ":" + password);
-            console.log("Sending to:", "/webhook/webhook/chatbot-query");
+            const sendQuery = () => {
+                let fetchUrl = "";
+                let fetchOptions = {};
 
+                if (this._hasUploadedFile) {
+                    // Call userDocQuery after file upload, no fileId needed
+                    fetchUrl = URLS.userDocQuery;
+                    fetchOptions = {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "mode": "no-cors",
+                            "Authorization": AUTH.getBasicAuthHeader()
+                        },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            query: sMessage
+                        })
+                    };
+                } else {
+                    // Normal query without file
+                    fetchUrl = URLS.normalQuery;
+                    fetchOptions = {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": AUTH.getBasicAuthHeader()
+                        },
+                        body: JSON.stringify({
+                            sessionId: sessionId,
+                            query: sMessage
+                        })
+                    };
+                }
 
-            fetch("https://n8n.archlynk.com/webhook/chatbot-query", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": basicAuth
-                },
-                body: JSON.stringify({ sessionId: this._sessionId, query: sMessage })
-            })
-            .then(response => response.ok ? response.text() : Promise.reject())
-            .then(text => {
-                const lastIndex = this.byId("chatMessagesBox").getItems().length - 1;
-                const botThinking = this.byId("chatMessagesBox").getItems()[lastIndex];
-                this.byId("chatMessagesBox").removeItem(botThinking); 
-            
-                let botReply = text;
-                try {
-                    const json = JSON.parse(text);
-                    botReply = json.output || json.response || text;
-                } catch (e) {}
-                this._addMessage(botReply, "bot");
-            })
-            .catch(() => {
-                const lastIndex = this.byId("chatMessagesBox").getItems().length - 1;
-                const botThinking = this.byId("chatMessagesBox").getItems()[lastIndex];
-                this.byId("chatMessagesBox").removeItem(botThinking);
-            
-                this._addMessage("⚠️ Unable to reach the bot. Please try again.", "bot");
-            });
-            // Clear input and file
+                fetch(fetchUrl, fetchOptions)
+                    .then(response => response.ok ? response.text() : Promise.reject())
+                    .then(text => {
+                        //this.byId("chatMessagesBox").removeItem(botThinkingMessage);
+                        this.byId("chatMessagesBox").removeItem(thinking.container);
+                        this.byId("sendButton").setEnabled(true);
+                        let botReply = text;
+                        try {
+                            const json = JSON.parse(text);
+                            botReply = json.output || json.response || text;
+                        } catch (e) { }
+                        this._addMessage(botReply, "bot");
+                    })
+                    .catch(() => {
+                        //this.byId("chatMessagesBox").removeItem(botThinkingMessage);
+
+                        this.byId("chatMessagesBox").removeItem(thinking.container);
+                        this._addMessage("⚠️ Unable to reach the bot. Please try again.", "bot");
+                        this.byId("sendButton").setEnabled(true);
+
+                    });
+            };
+
+            if (oFile) {
+                // Upload file first
+                const formData = new FormData();
+                formData.append("file", oFile);
+                formData.append("sessionId", sessionId); // Keep session consistent
+
+                fetch(URLS.fileUpload, {
+                    method: "POST",
+                    body: formData
+                })
+
+                    .then(response => response.ok ? response.text() : Promise.reject())
+                    .then(text => {
+                        // this.byId("chatMessagesBox").removeItem(botThinkingMessage);
+                        //this.byId("chatMessagesBox").removeItem(thinking.container);
+                        let botReply = text;
+                        try {
+                            const json = JSON.parse(text);
+                            botReply = json.output || json.response || json.status;
+                        } catch (e) { }
+
+                        thinking.textControl.setText(botReply);
+                        thinking.textControl.removeStyleClass("botTyping");
+                        //this._addMessage(botReply, "bot");
+                        this.byId("sendButton").setEnabled(true);
+                        this._hasUploadedFile = true;
+                        // this._uploadedFile = null;
+                    })
+                    .catch(() => {
+                        // this.byId("chatMessagesBox").removeItem(botThinkingMessage);
+                        // this._addMessage("⚠️ File upload failed. Please try again.", "bot");
+
+                        this.byId("sendButton").setEnabled(true);
+                        thinking.textControl.setText("⚠️ File upload failed. Please try again.");
+                        thinking.textControl.removeStyleClass("botTyping");
+                    });
+            } else {
+                // No file uploaded, normal query
+                sendQuery();
+            }
+
+            // Clear input and reset file states after sending
             oInput.setValue("");
             this._uploadedFile = null;
-
+            //this._hasUploadedFile = false;
             const chip = this.byId("uploadedFileChip");
             if (chip) chip.destroy();
-
             oInput.setVisible(true);
             this.byId("micButton").setEnabled(true);
         },
+
 
         _addMessage(text, role) {
             const oDate = new Date();
             const timestamp = oDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const isUser = role === "user";
 
-            const oMessageText = new Text({ text, wrapping: true }).addStyleClass(isUser ? "userMessage" : "botMessage");
+            // const oMessageText = new Text({ text, wrapping: true }).addStyleClass(isUser ? "userMessage" : "botMessage");
+            let oMessageText;
+            if (role === "bot") {
+                const html = this._convertMarkdownLinksToHTML(text); // optional conversion
+                oMessageText = new sap.m.FormattedText({
+                    htmlText: html
+                   // htmlText: this._convertMarkdownLinksToHTML(text)
+                }).addStyleClass("botMessage");
+            } else {
+                oMessageText = new sap.m.Text({
+                    text: text,
+                    wrapping: true
+                }).addStyleClass("userMessage");
+            }
+
             const oTimestampText = new Text({ text: timestamp }).addStyleClass("timestampText");
             const oTimestampHBox = new HBox({ justifyContent: isUser ? "End" : "Start", items: [oTimestampText] });
             const oMessageVBox = new VBox({ items: [oMessageText, oTimestampHBox] });
@@ -144,6 +238,7 @@ sap.ui.define([
             this.byId("chatMessagesBox").removeAllItems();
             this.byId("messageInput").setValue("").setVisible(true);
             this._uploadedFile = null;
+            this._hasUploadedFile = null;
             this._sessionId = null;
             this.byId("micButton").setEnabled(true);
 
@@ -181,28 +276,28 @@ sap.ui.define([
         onVoiceInput() {
             const micBtn = this.byId("micButton");
             const sendBtn = this.byId("sendButton");
-        
+
             if (!this._recognition) {
                 MessageToast.show("Speech recognition not supported.");
                 return;
             }
-        
+
             if (!this._isRecording) {
                 micBtn.setIcon("sap-icon://decline");
                 micBtn.addStyleClass("recordingGlow");
                 this._recognition.start();
                 this._isRecording = true;
-                sendBtn.setEnabled(false);               
+                sendBtn.setEnabled(false);
             } else {
                 this._recognition.stop();
                 micBtn.setIcon("sap-icon://microphone");
                 micBtn.removeStyleClass("recordingGlow");
                 this._isRecording = false;
                 this._transcriptBuffer = "";
-                sendBtn.setEnabled(true);   
+                sendBtn.setEnabled(true);
             }
         },
-        
+
 
         _setupSpeechRecognition() {
             if (!("webkitSpeechRecognition" in window)) return;
@@ -215,7 +310,7 @@ sap.ui.define([
             recognition.onresult = (event) => {
                 let interimTranscript = "";
                 let finalTranscript = "";
-            
+
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     const transcript = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
@@ -224,17 +319,17 @@ sap.ui.define([
                         interimTranscript += transcript + " ";
                     }
                 }
-            
+
                 // Combine with buffer only finalized results
                 if (finalTranscript) {
                     this._transcriptBuffer += finalTranscript;
                 }
-            
+
                 // Show live value in input
                 const combined = (this._transcriptBuffer + interimTranscript).trim();
                 this.byId("messageInput").setValue(combined);
             };
-            
+
 
             recognition.onerror = (event) => {
                 MessageToast.show("Speech error: " + event.error);
@@ -244,15 +339,16 @@ sap.ui.define([
             this._recognition = recognition;
         },
 
-        onFileUpload() {
+        onFileUpload: function () {
             const fileInput = document.createElement("input");
             fileInput.type = "file";
-            fileInput.accept = ".pdf,.doc,.docx,.txt";
+            fileInput.accept = ".pdf,.doc,.docx,.txt,.ppt,.pptx";
 
             fileInput.onchange = (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    this._uploadedFile = file;
+                    this._uploadedFile = file; // ⬅️ Only store, don't upload now
+                    this._hasSelectedFile = true;
                     this._showFileChip(file.name);
                 }
             };
@@ -297,7 +393,20 @@ sap.ui.define([
         _renderMessage(text, role, timestamp) {
             const isUser = role === "user";
 
-            const oMessageText = new Text({ text, wrapping: true }).addStyleClass(isUser ? "userMessage" : "botMessage");
+            // const oMessageText = new Text({ text, wrapping: true }).addStyleClass(isUser ? "userMessage" : "botMessage");
+            let oMessageText;
+            if (role === "bot") {
+                const html = this._convertMarkdownLinksToHTML(text); // optional conversion
+                oMessageText = new sap.m.FormattedText({
+                    htmlText: html
+                   // htmlText: this._convertMarkdownLinksToHTML(text)
+                }).addStyleClass("botMessage");
+            } else {
+                oMessageText = new sap.m.Text({
+                    text: text,
+                    wrapping: true
+                }).addStyleClass("userMessage");
+            }
             const oTimestampText = new Text({ text: timestamp }).addStyleClass("timestampText");
             const oTimestampHBox = new HBox({ justifyContent: isUser ? "End" : "Start", items: [oTimestampText] });
             const oMessageVBox = new VBox({ items: [oMessageText, oTimestampHBox] });
@@ -306,6 +415,41 @@ sap.ui.define([
             this.byId("chatMessagesBox").addItem(oMessageHBox);
             this._scrollToBottom();
         },
+
+        _showBotThinking() {
+            const oMessageText = new Text({ text: "Analyzing...", wrapping: true }).addStyleClass("botMessage botTyping");
+            const oTimestampText = new Text({ text: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }).addStyleClass("timestampText");
+            const oTimestampHBox = new HBox({ justifyContent: "Start", items: [oTimestampText] });
+            const oMessageVBox = new VBox({ items: [oMessageText, oTimestampHBox] });
+            const oMessageHBox = new HBox({ justifyContent: "Start", items: [oMessageVBox] });
+
+            this.byId("chatMessagesBox").addItem(oMessageHBox);
+            this._scrollToBottom();
+            this.byId("sendButton").setEnabled(false);
+
+            // Return this UI control so you can remove it later
+            //return oMessageHBox;
+            return {
+                container: oMessageHBox,
+                textControl: oMessageText
+            };
+        },
+        // _convertMarkdownLinksToHTML(text) {
+        //     return text.replace(/\[([^\[]+?)\((https?:\/\/[^\s)]+)\)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        // }
+        _convertMarkdownLinksToHTML(text) {
+            text = text.replace(/\[([^\]]+)\]\(([^)\s]+)\)\((https?:\/\/[^\s)]+)\)/g, (match, label, desc, url) => {
+                // Remove nested brackets from label
+                const cleanLabel = label.replace(/\[.*?\]/g, "").trim();
+                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${cleanLabel} ${desc}</a>`;
+            });
+            return text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        }
+        
+        
+        
+        
+
 
     });
 });

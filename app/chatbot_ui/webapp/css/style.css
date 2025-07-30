@@ -80,5 +80,50 @@ html, body, .sapUiBody, .sapMApp, .sapMPage {
     100% { box-shadow: 0 0 0px red; }
 }
 
+.botTyping {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 10px;
+  font-style: italic;
+}
+
+.botTyping::before,
+.botTyping::after,
+.botTyping::after {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #555;
+  animation: bounce 1s infinite ease-in-out;
+}
+
+.botTyping::before {
+  animation-delay: 0s;
+}
+
+.botTyping::after {
+  animation-delay: 0.2s;
+}
+
+.botTyping::after {
+  animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+
+
  
   
