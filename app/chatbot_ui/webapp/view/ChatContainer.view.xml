@@ -1,51 +1,70 @@
 <mvc:View
   controllerName="chatbotui.controller.ChatContainer"
-	xmlns:mvc="sap.ui.core.mvc"
-	xmlns="sap.m"
-	xmlns:layout="sap.ui.layout">
-	<Page id="_IDchatPage" enableScrolling="false">
-		<customHeader>
-			<Bar id="chatHeader">
-				<contentLeft>
-					<HBox id="_IDGenHBox1" width="100%" justifyContent="Start" alignItems="Center" class="headerHBox">
-						<Image id="_IDGenImage"  height="32px" width="32px" />	
-						<Title id="_IDGenTitle" text="ArchAI" level="H2" />
-					</HBox>
-				</contentLeft>
-			</Bar>
-		</customHeader>
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:layout="sap.ui.layout"
+  displayBlock="true">
 
-		<!-- VBox flex container -->
-		<VBox id="mainVBox" class="chatMainVBox" fitContainer="true">
-			<ScrollContainer id="_IDGenScrollContainer1"
-		      height="90%"
-		      width="100%"
-		      vertical="true"
-		      horizontal="false">
-				<VBox id="chatMessagesBox" class= "sapUiSmallMargin" />
-			</ScrollContainer>
-		</VBox>
+  <Page id="_IDchatPage" enableScrolling="false">
+    <customHeader>
+      <Bar id="chatHeader">
+        <contentLeft>
+          <HBox id="_IDGenHBox1" width="100%" justifyContent="Start" alignItems="Center" class="headerHBox">
+            <Image id="_IDGenImage" height="64px" width="64px" />
+            <Title id="_IDGenTitle" text="Uploara" level="H2" />
+          </HBox>
+        </contentLeft>
+      </Bar>
+    </customHeader>
 
-		<!-- Footer with toolbar -->
-		<footer >
-			<OverflowToolbar id="chatFooterToolbar" class="chatFooterBar">
-				<HBox id="_IDGenHBox4" class="footerHBox" alignItems="Center" justifyContent="SpaceBetween" width="100%">
-					<Button id="uploadButton" icon="sap-icon://attachment" tooltip="Upload File" press="onFileUpload" />
-					<VBox id="inputWrapper" width="100%">
-						<TextArea
-            id="messageInput"
-            growing="true"
-            growingMaxLines="3"
-            placeholder="Type your message..."
-            class="footerInput"
-            width="100%" />
-					</VBox>
-					<HBox id="_IDGenHBox5" alignItems="Center" renderType="Div">
-						<Button id="micButton" icon="sap-icon://microphone" tooltip="Voice Input" press="onVoiceInput" />
-						<Button id="sendButton" icon="sap-icon://paper-plane" type="Emphasized" tooltip="Send Message" press="onSend" />
-					</HBox>
-				</HBox>
-			</OverflowToolbar>
-		</footer>
-	</Page>
+    <!-- VBox flex container -->
+    <VBox id="mainVBox" class="chatMainVBox" fitContainer="true">
+      <VBox
+        id="welcomeContainer"
+        alignItems="Center"
+        justifyContent="Center"
+        class="welcomeContainer"
+        height="100%">
+
+        <!-- Illustrated Message Instead of Custom Image -->
+        <IllustratedMessage
+          id="welcomeIllustration"
+          illustrationType="sapIllus-Survey"
+          title="Welcome to Uploara"
+          description="Start typing below to chat or upload a file."  />
+
+      </VBox>
+
+      <ScrollContainer
+        id="_IDGenScrollContainer1"
+        height="90%"
+        width="100%"
+        vertical="true"
+        horizontal="false">
+        <VBox id="chatMessagesBox" class="sapUiSmallMargin" />
+      </ScrollContainer>
+    </VBox>
+
+    <!-- Footer with toolbar -->
+    <footer>
+      <OverflowToolbar id="chatFooterToolbar" class="chatFooterBar">
+        <HBox id="_IDGenHBox4" class="footerHBox" alignItems="Center" justifyContent="SpaceBetween" width="100%">
+          <Button id="uploadButton" icon="sap-icon://attachment" tooltip="Upload File" press="onFileUpload" />
+          <VBox id="inputWrapper" width="100%">
+            <TextArea
+              id="messageInput"
+              growing="true"
+              growingMaxLines="3"
+              placeholder="Type your message..."
+              class="footerInput"
+              width="100%" />
+          </VBox>
+          <HBox id="_IDGenHBox5" alignItems="Center" renderType="Div">
+            <Button id="micButton" icon="sap-icon://microphone" tooltip="Voice Input" press="onVoiceInput" />
+            <Button id="sendButton" icon="sap-icon://paper-plane" type="Emphasized" tooltip="Send Message" press="onSend" />
+          </HBox>
+        </HBox>
+      </OverflowToolbar>
+    </footer>
+  </Page>
 </mvc:View>

@@ -3,6 +3,7 @@
   padding: 10px 14px;
   font-size: 14px;
   word-break: break-word;
+  border-radius: 16px;
 }
 
 .userMessage { 
@@ -121,6 +122,39 @@ html, body, .sapUiBody, .sapMApp, .sapMPage {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+
+.botMessage pre {
+  background-color: #f4f4f4;
+  padding: 8px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-family: monospace;
+}
+
+.botMessage code {
+  background-color: #eee;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+/* .botMessage table {
+  border-collapse: collapse;
+  width: 100%;
+} */
+
+.botMessage th, .botMessage td {
+  border: 1px solid #ccc;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.botMessage blockquote {
+  border-left: 4px solid #ccc;
+  margin: 0;
+  padding-left: 10px;
+  color: #666;
 }
 
 

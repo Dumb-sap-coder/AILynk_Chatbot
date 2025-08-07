@@ -1,0 +1,33 @@
+<mvc:View
+  controllerName="chatbotui.controller.NoChat"
+  displayBlock="true"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core">
+
+  <VBox id="_IDGenVBox"
+    height="100%"
+    justifyContent="Center"
+    alignItems="Center"
+    class="sapUiResponsiveContentPadding">
+    <!-- style="text-align: center;" -->
+    
+
+    <!-- 🖼️ Custom Image -->
+    <Image id="_IDGenImage1"
+      width="300px"
+      decorative="false" />
+
+    <!-- 📝 Title -->
+    <Title id="_IDGenTitle2"
+      text="Welcome to Uploara"
+      level="H2"
+      class="sapUiTinyMarginTop" />
+
+    <!-- 💬 Subtitle -->
+    <Text id="_IDGenText"
+      text="Start a new chat to begin."
+      class="sapUiSmallMarginTop" />
+
+  </VBox>
+</mvc:View>

@@ -5,6 +5,7 @@ sap.ui.define([
 
   return Controller.extend("chatbotui.controller.Sidebar", {
     onInit() {
+      this.getOwnerComponent().getRouter().navTo("nochat");
       this._loadChatList();
       sap.ui.getCore().getEventBus().subscribe("chat", "sessionUpdated", this._loadChatList, this);
       //sap.ui.getCore().getEventBus().publish("chat", "forceReset");

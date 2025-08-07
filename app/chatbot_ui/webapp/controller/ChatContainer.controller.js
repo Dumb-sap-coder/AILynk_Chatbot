@@ -3,13 +3,18 @@ sap.ui.define([
     "sap/m/MessageToast",
     "sap/m/Text",
     "sap/m/HBox",
-    "sap/m/VBox"
-], function (Controller, MessageToast, Text, HBox, VBox) {
+    "sap/m/VBox",
+    "sap/m/FormattedText"
+], function (Controller, MessageToast, Text, HBox, VBox,FormattedText) {
     "use strict";
+
+    if (!window.marked) {
+        jQuery.sap.includeScript("libs/marked.min.js");
+    }
 
     const URLS = {
         normalQuery: "https://n8n.archlynk.com/webhook/chatbot-query",
-        fileUpload: "https://a2a86f3c6c41.ngrok-free.app/api/v1/archAI/file-upload",
+        fileUpload: "https://59dc3291a7b1.ngrok-free.app/api/v1/archAI/file-upload",
         userDocQuery: "https://n8n.archlynk.com/webhook/chatbot-user-doc-query"
     };
 
@@ -33,11 +38,14 @@ sap.ui.define([
             const oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.getRoute("chatcontainer").attachPatternMatched(this._onRouteMatched, this);
 
-            const oImage = this.byId("_IDGenImage");
-            if (oImage) {
-                const sImagePath = sap.ui.require.toUrl("chatbotui/img/logo.png");
-                oImage.setSrc(sImagePath);
-            }
+            const sImagePath = sap.ui.require.toUrl("chatbotui/img/uploara_logo.png");
+
+            [this.byId("_IDGenImage"), this.byId("_IDGenImage3")].forEach(img => {
+                if (img) {
+                    img.setSrc(sImagePath);
+                }
+            });
+           
         },
 
         _onRouteMatched(oEvent) {
@@ -67,6 +75,7 @@ sap.ui.define([
 
             const sessionId = this._sessionId || this._generateSessionId();
             this._sessionId = sessionId;
+            const activeSessionId = sessionId;
             //const botThinkingMessage = this._showBotThinking();
             const thinking = this._showBotThinking();
 
@@ -116,11 +125,27 @@ sap.ui.define([
                             const json = JSON.parse(text);
                             botReply = json.output || json.response || text;
                         } catch (e) { }
+                        if (this._sessionId !== activeSessionId) {
+                            const session = this._chatSessions[activeSessionId];
+                            if (session) {
+                                session.messages.push({
+                                    text: botReply,
+                                    role: "bot",
+                                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                });
+                                this._saveSessions();
+                            }
+                            return;
+                        }
+        
+                        this.byId("chatMessagesBox").removeItem(thinking.container);
                         this._addMessage(botReply, "bot");
+                        this.byId("sendButton").setEnabled(true);
+                        //this._addMessage(botReply, "bot");
                     })
                     .catch(() => {
                         //this.byId("chatMessagesBox").removeItem(botThinkingMessage);
-
+                        if (this._sessionId !== activeSessionId) return;
                         this.byId("chatMessagesBox").removeItem(thinking.container);
                         this._addMessage("⚠️ Unable to reach the bot. Please try again.", "bot");
                         this.byId("sendButton").setEnabled(true);
@@ -141,8 +166,6 @@ sap.ui.define([
 
                     .then(response => response.ok ? response.text() : Promise.reject())
                     .then(text => {
-                        // this.byId("chatMessagesBox").removeItem(botThinkingMessage);
-                        //this.byId("chatMessagesBox").removeItem(thinking.container);
                         let botReply = text;
                         try {
                             const json = JSON.parse(text);
@@ -152,14 +175,29 @@ sap.ui.define([
                         thinking.textControl.setText(botReply);
                         thinking.textControl.removeStyleClass("botTyping");
                         //this._addMessage(botReply, "bot");
-                        this.byId("sendButton").setEnabled(true);
+                        if (this._sessionId !== activeSessionId) {
+                            const session = this._chatSessions[activeSessionId];
+                            if (session) {
+                                session.messages.push({
+                                    text: botReply,
+                                    role: "bot",
+                                    timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                                });
+                                this._saveSessions();
+                            }
+                            return;
+                        }
+        
+                        thinking.textControl.setText(botReply);
+                        thinking.textControl.removeStyleClass("botTyping");
                         this._hasUploadedFile = true;
-                        // this._uploadedFile = null;
+                        this.byId("sendButton").setEnabled(true);
+                       
                     })
                     .catch(() => {
                         // this.byId("chatMessagesBox").removeItem(botThinkingMessage);
                         // this._addMessage("⚠️ File upload failed. Please try again.", "bot");
-
+                        if (this._sessionId !== activeSessionId) return;
                         this.byId("sendButton").setEnabled(true);
                         thinking.textControl.setText("⚠️ File upload failed. Please try again.");
                         thinking.textControl.removeStyleClass("botTyping");
@@ -188,7 +226,9 @@ sap.ui.define([
             // const oMessageText = new Text({ text, wrapping: true }).addStyleClass(isUser ? "userMessage" : "botMessage");
             let oMessageText;
             if (role === "bot") {
-                const html = this._convertMarkdownLinksToHTML(text); // optional conversion
+                //const formattedText = text.replace(/\n/g, "<br>");
+                //const html = this._convertMarkdownLinksToHTML(formattedText); // optional conversion
+                const html = this._convertMarkdownToHTML(text);
                 oMessageText = new sap.m.FormattedText({
                     htmlText: html
                    // htmlText: this._convertMarkdownLinksToHTML(text)
@@ -222,6 +262,7 @@ sap.ui.define([
 
             session.messages.push({ text, role, timestamp });
             this._saveSessions();
+            this._showWelcome(false);
         },
 
         _scrollToBottom() {
@@ -244,6 +285,7 @@ sap.ui.define([
 
             const chip = this.byId("uploadedFileChip");
             if (chip) chip.destroy();
+            this._showWelcome(true);
         },
 
         loadSession(sessionId) {
@@ -257,6 +299,11 @@ sap.ui.define([
             this._sessionId = sessionId;
 
             session.messages.forEach(msg => this._renderMessage(msg.text, msg.role, msg.timestamp));
+            if (session.messages.length > 0) {
+                this._showWelcome(false);
+            } else {
+                this._showWelcome(true);
+            }
         },
 
         _generateSessionId() {
@@ -396,7 +443,10 @@ sap.ui.define([
             // const oMessageText = new Text({ text, wrapping: true }).addStyleClass(isUser ? "userMessage" : "botMessage");
             let oMessageText;
             if (role === "bot") {
-                const html = this._convertMarkdownLinksToHTML(text); // optional conversion
+                //const formattedText = text.replace(/\n/g, "<br>");
+                //const html = this._convertMarkdownLinksToHTML(formattedText); // optional conversion
+                //const html = MarkdownFormatter.parseMarkdown(text);
+                const html = this._convertMarkdownToHTML(text);
                 oMessageText = new sap.m.FormattedText({
                     htmlText: html
                    // htmlText: this._convertMarkdownLinksToHTML(text)
@@ -428,28 +478,32 @@ sap.ui.define([
             this.byId("sendButton").setEnabled(false);
 
             // Return this UI control so you can remove it later
-            //return oMessageHBox;
             return {
                 container: oMessageHBox,
                 textControl: oMessageText
             };
         },
+ 
         // _convertMarkdownLinksToHTML(text) {
-        //     return text.replace(/\[([^\[]+?)\((https?:\/\/[^\s)]+)\)\]/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-        // }
-        _convertMarkdownLinksToHTML(text) {
-            text = text.replace(/\[([^\]]+)\]\(([^)\s]+)\)\((https?:\/\/[^\s)]+)\)/g, (match, label, desc, url) => {
-                // Remove nested brackets from label
-                const cleanLabel = label.replace(/\[.*?\]/g, "").trim();
-                return `<a href="${url}" target="_blank" rel="noopener noreferrer">${cleanLabel} ${desc}</a>`;
-            });
-            return text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-        }
-        
-        
-        
-        
+        //     text = text.replace(/\[([^\]]+)\]\(([^)\s]+)\)\((https?:\/\/[^\s)]+)\)/g, (match, label, desc, url) => {
+        //         // Remove nested brackets from label
+        //         const cleanLabel = label.replace(/\[.*?\]/g, "").trim();
+        //         return `<a href="${url}" target="_blank" rel="noopener noreferrer">${cleanLabel} ${desc}</a>`;
+        //     });
+        //     return text.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+        // },
 
+        _convertMarkdownToHTML(markdownText) {
+            if (window.marked) {
+                return marked.parse(markdownText);
+            }
+            return markdownText; // fallback
+        },
+
+        _showWelcome(visible) {
+            this.byId("welcomeContainer").setVisible(visible);
+            this.byId("_IDGenScrollContainer1").setVisible(!visible);
+        }
 
     });
 });
