@@ -37,11 +37,11 @@ html, body, .sapUiBody, .sapMApp, .sapMPage {
   
   /* Footer styling, NO fixed position */
 .chatFooterBar {
-    background-color: white;
+    /* background-color: white; */
     box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1);
     padding: 0 12px;
     width: 100%;
-    min-height: 85px; 
+    min-height: 80px; 
     display: flex;
     align-items: center;
 }
@@ -135,14 +135,14 @@ html, body, .sapUiBody, .sapMApp, .sapMPage {
 
 .botMessage code {
   background-color: #eee;
-  padding: 2px 4px;
+  /* padding: 2px 4px; */
   border-radius: 3px;
 }
 
-/* .botMessage table {
+.botMessage table {
   border-collapse: collapse;
   width: 100%;
-} */
+}
 
 .botMessage th, .botMessage td {
   border: 1px solid #ccc;
@@ -153,9 +153,54 @@ html, body, .sapUiBody, .sapMApp, .sapMPage {
 .botMessage blockquote {
   border-left: 4px solid #ccc;
   margin: 0;
+  border-radius: 16px;
   padding-left: 10px;
   color: #666;
+  line-height: 1.5; /* ensures enough vertical space */
+  overflow-wrap: break-word; /* ensures long words wrap safely */
+  word-break: break-word;
 }
+
+.chat-options-btn {
+  visibility: hidden;
+  transition: visibility 0.2s ease;
+}
+
+.chat-list-item:hover .chat-options-btn {
+  visibility: visible;
+}
+
+/* Capsule input wrapper */
+.capsuleInput .sapMInputBaseContentWrapper {
+  border: none !important;
+  background: #fafafa !important;   /* soft grey */
+  border-radius: 9999px !important;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+  transition: box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Inner text area */
+.capsuleInput textarea {
+  background: transparent !important;
+  padding: 10px 16px !important;
+  resize: none;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Kill UI5 focus ring */
+.capsuleInput .sapMInputBaseContentWrapper:before,
+.capsuleInput.sapMFocus .sapMInputBaseContentWrapper:before {
+  content: none !important;
+}
+
+/* Custom focus style */
+.capsuleInput.sapMFocus .sapMInputBaseContentWrapper {
+  background: #fff !important;
+  box-shadow: 0 0 0 2px rgba(25,118,210,0.35);
+}
+
 
 
 

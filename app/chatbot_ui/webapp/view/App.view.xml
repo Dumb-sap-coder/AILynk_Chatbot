@@ -3,7 +3,7 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m">
     <Shell id="_IDGenShell">
-     <SplitApp id="app" class="sapUiResponsiveContentPadding">
+     <SplitApp id="app" >
   <masterPages>
     <mvc:XMLView id="_IDGenXMLView1" viewName="chatbotui.view.Sidebar" />
   </masterPages>

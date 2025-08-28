@@ -15,7 +15,17 @@
     </customHeader>
 
     <content>
-      <List id="_IDGenList" mode="SingleSelectMaster" itemPress="onSessionSelect" width="100%" growing="true" />
+      <List id="_IDGenList" mode="SingleSelectMaster" itemPress="onSessionSelect" width="100%" growing="true"/>
+        <!-- <CustomListItem id="_IDGenCustomListItem" type="Active" >
+        <HBox id="_IDGenHBox" width="100%" alignItems="Center" class ="chat-list-item">
+           <Button id="_IDGenButton1"
+              icon="sap-icon://overflow"
+              type="Transparent"
+              press="onChatOptionsPress"
+              class="chat-options-btn"
+            />
+        </HBox>
+        </CustomListItem> -->
     </content>
 
     <!-- <footer>
